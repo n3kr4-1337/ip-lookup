@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>IP Lookup - AthenaX</title>
+<title>IP Lookup - n3kr4</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap');
   html, body {
@@ -43,24 +43,6 @@
     font-size: 1.4rem;
     margin-bottom: 10px;
     color: #8ef9f3;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    justify-content: center;
-  }
-  button.small-btn {
-    background: #50e3c2;
-    border: none;
-    border-radius: 6px;
-    padding: 6px 10px;
-    font-size: 1rem;
-    color: #0a0a0a;
-    cursor: pointer;
-    box-shadow: 0 0 10px #50e3c2;
-    transition: background-color 0.3s ease;
-  }
-  button.small-btn:hover {
-    background: #40b8a6;
   }
   .lookup-panel {
     background: rgba(15, 15, 15, 0.85);
@@ -69,7 +51,6 @@
     box-shadow: 0 0 20px #50e3c2aa;
     max-width: 380px;
     width: 100%;
-    margin-top: 10px;
   }
   input[type="text"] {
     width: 100%;
@@ -97,6 +78,7 @@
     cursor: pointer;
     box-shadow: 0 0 12px #50e3c2;
     transition: background-color 0.3s ease;
+    margin-bottom: 10px;
   }
   button:hover {
     background: #40b8a6;
@@ -107,7 +89,6 @@
     color: #aaf3e3;
     word-break: break-word;
     min-height: 70px;
-    white-space: pre-wrap;
   }
   footer {
     z-index: 2;
@@ -140,24 +121,22 @@
 <body>
 <canvas id="bgCanvas"></canvas>
 <main>
-  <h1>IP Lookup AthenaX</h1>
-  <div class="your-ip">
-    Votre IP publique : <span id="public-ip">Chargement...</span>
-    <button class="small-btn" id="refresh-ip">⟳ Rafraîchir</button>
-  </div>
+  <h1>IP Lookup</h1>
+  <div class="your-ip">Votre IPv4 : <span id="public-ip">Chargement...</span></div>
+  <button id="refresh-btn">⟳ Rafraîchir</button>
   <div class="lookup-panel">
     <input type="text" id="ip-input" placeholder="Entrez une IP à chercher" />
     <button id="lookup-btn">Rechercher</button>
-    <button id="download-btn" style="margin-top:10px; background:#3aafa9;">Télécharger le rapport</button>
+    <button id="download-btn">Télécharger le rapport</button>
     <div class="result" id="lookup-result"></div>
   </div>
 </main>
 <footer>
-  2025 © tous droits réservés <a href="https://guns.lol" target="_blank" rel="noopener">n3kr4</a>
+  2025 © ip lookup by <a href="https://guns.lol/bsm" target="_blank" rel="noopener">n3kr4</a>
 </footer>
 
 <script>
-// Animation bulles fond
+// Bulles animées en fond
 const canvas = document.getElementById('bgCanvas');
 const ctx = canvas.getContext('2d');
 let w, h;
@@ -169,9 +148,7 @@ window.addEventListener('resize', resize);
 resize();
 
 class Bubble {
-  constructor() {
-    this.reset();
-  }
+  constructor() { this.reset(); }
   reset() {
     this.x = Math.random() * w;
     this.y = h + Math.random() * 100;
@@ -192,16 +169,10 @@ class Bubble {
     ctx.fill();
   }
 }
-
-const bubbles = [];
-for(let i=0; i<50; i++) bubbles.push(new Bubble());
-
+const bubbles = Array.from({length: 50}, () => new Bubble());
 function animate() {
   ctx.clearRect(0, 0, w, h);
-  bubbles.forEach(b => {
-    b.update();
-    b.draw();
-  });
+  bubbles.forEach(b => { b.update(); b.draw(); });
   requestAnimationFrame(animate);
 }
 animate();
@@ -217,21 +188,16 @@ async function fetchPublicIP() {
   }
 }
 fetchPublicIP();
+setInterval(fetchPublicIP, 60000);
+document.getElementById('refresh-btn').addEventListener('click', fetchPublicIP);
 
-// Rafraîchir IP au clic
-document.getElementById('refresh-ip').addEventListener('click', () => {
-  document.getElementById('public-ip').textContent = "Chargement...";
-  fetchPublicIP();
-});
-
-// Lookup IP
-let lastResult = null;
+// Lookup IP + rapport texte
+let lastResult = "";
 document.getElementById('lookup-btn').addEventListener('click', async () => {
   const ip = document.getElementById('ip-input').value.trim();
   const resultDiv = document.getElementById('lookup-result');
   if (!ip) {
     resultDiv.textContent = "Merci d'entrer une IP valide.";
-    lastResult = null;
     return;
   }
   resultDiv.textContent = "Recherche en cours...";
@@ -239,29 +205,30 @@ document.getElementById('lookup-btn').addEventListener('click', async () => {
     const res = await fetch(`https://ipapi.co/${ip}/json/`);
     const data = await res.json();
     if(data.error) {
-      resultDiv.textContent = "IP non trouvée.";
-      lastResult = null;
+      resultDiv.textContent = "IP invalide.";
+      lastResult = "";
     } else {
-      const text = 
-        `IP: ${data.ip}\n` +
-        `Ville: ${data.city || 'N/A'}\n` +
-        `Région: ${data.region || 'N/A'}\n` +
-        `Pays: ${data.country_name || 'N/A'}\n` +
-        `Code postal: ${data.postal || 'N/A'}\n` +
-        `Fournisseur: ${data.org || 'N/A'}`;
-      resultDiv.textContent = text;
-      lastResult = text;
+      const resultText = `
+IP : ${data.ip}
+Ville : ${data.city || 'N/A'}
+Région : ${data.region || 'N/A'}
+Pays : ${data.country_name || 'N/A'}
+Code postal : ${data.postal || 'N/A'}
+Fournisseur : ${data.org || 'N/A'}
+      `.trim();
+      resultDiv.innerHTML = resultText.replace(/\n/g, '<br/>');
+      lastResult = resultText;
     }
   } catch {
-    resultDiv.textContent = "Erreur lors de la recherche.";
-    lastResult = null;
+    resultDiv.textContent = "Erreur.";
+    lastResult = "";
   }
 });
 
-// Télécharger le rapport
+// Télécharger le rapport texte
 document.getElementById('download-btn').addEventListener('click', () => {
   if (!lastResult) {
-    alert("Aucun rapport à télécharger. Faites une recherche d'abord.");
+    alert("Aucun rapport à télécharger.");
     return;
   }
   const blob = new Blob([lastResult], { type: 'text/plain' });
@@ -271,10 +238,8 @@ document.getElementById('download-btn').addEventListener('click', () => {
   a.download = 'rapport-ip.txt';
   document.body.appendChild(a);
   a.click();
-  setTimeout(() => {
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  }, 0);
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 });
 </script>
 </body>
