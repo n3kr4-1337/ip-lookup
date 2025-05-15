@@ -1,3 +1,231 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>IP Lookup - AthenaX</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap');
+  html, body {
+    margin: 0; padding: 0; height: 100%;
+    background: #0a0a0a;
+    font-family: 'Roboto Mono', monospace;
+    color: #eee;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  canvas#bgCanvas {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    background: #0a0a0a;
+  }
+  main {
+    z-index: 1;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    text-align: center;
+  }
+  h1 {
+    margin-bottom: 10px;
+    font-size: 2.8rem;
+    color: #50e3c2;
+    text-shadow: 0 0 8px #50e3c2;
+  }
+  .your-ip {
+    font-size: 1.4rem;
+    margin-bottom: 20px;
+    color: #8ef9f3;
+  }
+  .lookup-panel {
+    background: rgba(15, 15, 15, 0.85);
+    padding: 20px 30px;
+    border-radius: 12px;
+    box-shadow: 0 0 20px #50e3c2aa;
+    max-width: 380px;
+    width: 100%;
+  }
+  input[type="text"] {
+    width: 100%;
+    padding: 12px 15px;
+    font-size: 1.2rem;
+    border: none;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    background: #111;
+    color: #eee;
+    box-shadow: inset 0 0 8px #50e3c2;
+  }
+  input[type="text"]::placeholder {
+    color: #50e3c2aa;
+  }
+  button {
+    width: 100%;
+    padding: 12px;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #0a0a0a;
+    background: #50e3c2;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 0 12px #50e3c2;
+    transition: background-color 0.3s ease;
+  }
+  button:hover {
+    background: #40b8a6;
+  }
+  .result {
+    margin-top: 20px;
+    font-size: 1.1rem;
+    color: #aaf3e3;
+    word-break: break-word;
+    min-height: 70px;
+  }
+  footer {
+    z-index: 2;
+    padding: 12px 0;
+    background: #050505cc;
+    color: #50e3c2;
+    font-size: 0.9rem;
+    text-align: center;
+    user-select: none;
+  }
+  footer a {
+    color: #50e3c2;
+    text-decoration: none;
+    font-weight: 700;
+  }
+  footer a:hover {
+    text-decoration: underline;
+  }
+  @media (max-width: 480px) {
+    h1 {
+      font-size: 2rem;
+    }
+    .lookup-panel {
+      max-width: 90vw;
+      padding: 15px 20px;
+    }
+  }
+</style>
+</head>
+<body>
+<canvas id="bgCanvas"></canvas>
+<main>
+  <h1>IP Lookup AthenaX</h1>
+  <div class="your-ip">Votre IP publique : <span id="public-ip">Chargement...</span></div>
+  <div class="lookup-panel">
+    <input type="text" id="ip-input" placeholder="Entrez une IP à chercher" />
+    <button id="lookup-btn">Rechercher</button>
+    <div class="result" id="lookup-result"></div>
+  </div>
+</main>
+<footer>
+  2025 © tous droits réservés <a href="https://guns.lol" target="_blank" rel="noopener">n3kr4</a>
+</footer>
+
+<script>
+// Animation bulles fond
+const canvas = document.getElementById('bgCanvas');
+const ctx = canvas.getContext('2d');
+let w, h;
+function resize() {
+  w = canvas.width = window.innerWidth;
+  h = canvas.height = window.innerHeight;
+}
+window.addEventListener('resize', resize);
+resize();
+
+class Bubble {
+  constructor() {
+    this.reset();
+  }
+  reset() {
+    this.x = Math.random() * w;
+    this.y = h + Math.random() * 100;
+    this.radius = 5 + Math.random() * 15;
+    this.speed = 0.5 + Math.random() * 1.5;
+    this.opacity = 0.1 + Math.random() * 0.3;
+  }
+  update() {
+    this.y -= this.speed;
+    if (this.y < -this.radius) this.reset();
+  }
+  draw() {
+    ctx.beginPath();
+    ctx.fillStyle = `rgba(80, 227, 194, ${this.opacity})`;
+    ctx.shadowColor = 'rgba(80, 227, 194, 0.7)';
+    ctx.shadowBlur = 8;
+    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+const bubbles = [];
+for(let i=0; i<50; i++) bubbles.push(new Bubble());
+
+function animate() {
+  ctx.clearRect(0, 0, w, h);
+  bubbles.forEach(b => {
+    b.update();
+    b.draw();
+  });
+  requestAnimationFrame(animate);
+}
+animate();
+
+// Récupération IP publique
+async function fetchPublicIP() {
+  try {
+    const res = await fetch('https://api.ipify.org?format=json');
+    const data = await res.json();
+    document.getElementById('public-ip').textContent = data.ip;
+  } catch {
+    document.getElementById('public-ip').textContent = 'Erreur de chargement';
+  }
+}
+fetchPublicIP();
+setInterval(fetchPublicIP, 60000); // refresh toutes les 60s
+
+// Lookup IP
+document.getElementById('lookup-btn').addEventListener('click', async () => {
+  const ip = document.getElementById('ip-input').value.trim();
+  const resultDiv = document.getElementById('lookup-result');
+  if (!ip) {
+    resultDiv.textContent = "Merci d'entrer une IP valide.";
+    return;
+  }
+  resultDiv.textContent = "Recherche en cours...";
+  try {
+    const res = await fetch(`https://ipapi.co/${ip}/json/`);
+    const data = await res.json();
+    if(data.error) {
+      resultDiv.textContent = "IP non trouvée.";
+    } else {
+      resultDiv.innerHTML = `
+        <strong>IP:</strong> ${data.ip}<br/>
+        <strong>Ville:</strong> ${data.city || 'N/A'}<br/>
+        <strong>Région:</strong> ${data.region || 'N/A'}<br/>
+        <strong>Pays:</strong> ${data.country_name || 'N/A'}<br/>
+        <strong>Code postal:</strong> ${data.postal || 'N/A'}<br/>
+        <strong>Fournisseur:</strong> ${data.org || 'N/A'}
+      `;
+    }
+  } catch {
+    resultDiv.textContent = "Erreur lors de la recherche.";
+  }
+});
+</script>
+</body>
+</html>
 
 <!DOCTYPE html>
 <html lang="fr">
