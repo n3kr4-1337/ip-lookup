@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>IP Lookup - n3kr4</title>
+<title>IP Lookup - AthenaX</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap');
   html, body {
@@ -41,8 +41,26 @@
   }
   .your-ip {
     font-size: 1.4rem;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
     color: #8ef9f3;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    justify-content: center;
+  }
+  button.small-btn {
+    background: #50e3c2;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 1rem;
+    color: #0a0a0a;
+    cursor: pointer;
+    box-shadow: 0 0 10px #50e3c2;
+    transition: background-color 0.3s ease;
+  }
+  button.small-btn:hover {
+    background: #40b8a6;
   }
   .lookup-panel {
     background: rgba(15, 15, 15, 0.85);
@@ -51,6 +69,7 @@
     box-shadow: 0 0 20px #50e3c2aa;
     max-width: 380px;
     width: 100%;
+    margin-top: 10px;
   }
   input[type="text"] {
     width: 100%;
@@ -88,6 +107,7 @@
     color: #aaf3e3;
     word-break: break-word;
     min-height: 70px;
+    white-space: pre-wrap;
   }
   footer {
     z-index: 2;
@@ -120,16 +140,20 @@
 <body>
 <canvas id="bgCanvas"></canvas>
 <main>
-  <h1>IP Lookup</h1>
-  <div class="your-ip">Votre IPv4 : <span id="public-ip">Load ...</span></div>
+  <h1>IP Lookup AthenaX</h1>
+  <div class="your-ip">
+    Votre IP publique : <span id="public-ip">Chargement...</span>
+    <button class="small-btn" id="refresh-ip">⟳ Rafraîchir</button>
+  </div>
   <div class="lookup-panel">
     <input type="text" id="ip-input" placeholder="Entrez une IP à chercher" />
     <button id="lookup-btn">Rechercher</button>
+    <button id="download-btn" style="margin-top:10px; background:#3aafa9;">Télécharger le rapport</button>
     <div class="result" id="lookup-result"></div>
   </div>
 </main>
 <footer>
-  2025 © ip lookup by <a href="https://guns.lol/bsm" target="_blank" rel="noopener">n3kr4</a>
+  2025 © tous droits réservés <a href="https://guns.lol" target="_blank" rel="noopener">n3kr4</a>
 </footer>
 
 <script>
@@ -193,14 +217,21 @@ async function fetchPublicIP() {
   }
 }
 fetchPublicIP();
-setInterval(fetchPublicIP, 60000); // refresh toutes les 60s
+
+// Rafraîchir IP au clic
+document.getElementById('refresh-ip').addEventListener('click', () => {
+  document.getElementById('public-ip').textContent = "Chargement...";
+  fetchPublicIP();
+});
 
 // Lookup IP
+let lastResult = null;
 document.getElementById('lookup-btn').addEventListener('click', async () => {
   const ip = document.getElementById('ip-input').value.trim();
   const resultDiv = document.getElementById('lookup-result');
   if (!ip) {
     resultDiv.textContent = "Merci d'entrer une IP valide.";
+    lastResult = null;
     return;
   }
   resultDiv.textContent = "Recherche en cours...";
@@ -208,56 +239,43 @@ document.getElementById('lookup-btn').addEventListener('click', async () => {
     const res = await fetch(`https://ipapi.co/${ip}/json/`);
     const data = await res.json();
     if(data.error) {
-      resultDiv.textContent = "IP invalid.";
+      resultDiv.textContent = "IP non trouvée.";
+      lastResult = null;
     } else {
-      resultDiv.innerHTML = `
-        <strong>IP:</strong> ${data.ip}<br/>
-        <strong>Ville:</strong> ${data.city || 'N/A'}<br/>
-        <strong>Région:</strong> ${data.region || 'N/A'}<br/>
-        <strong>Pays:</strong> ${data.country_name || 'N/A'}<br/>
-        <strong>Code postal:</strong> ${data.postal || 'N/A'}<br/>
-        <strong>Fournisseur:</strong> ${data.org || 'N/A'}
-      `;
+      const text = 
+        `IP: ${data.ip}\n` +
+        `Ville: ${data.city || 'N/A'}\n` +
+        `Région: ${data.region || 'N/A'}\n` +
+        `Pays: ${data.country_name || 'N/A'}\n` +
+        `Code postal: ${data.postal || 'N/A'}\n` +
+        `Fournisseur: ${data.org || 'N/A'}`;
+      resultDiv.textContent = text;
+      lastResult = text;
     }
   } catch {
-    resultDiv.textContent = "Erreur.";
+    resultDiv.textContent = "Erreur lors de la recherche.";
+    lastResult = null;
   }
 });
+
+// Télécharger le rapport
+document.getElementById('download-btn').addEventListener('click', () => {
+  if (!lastResult) {
+    alert("Aucun rapport à télécharger. Faites une recherche d'abord.");
+    return;
+  }
+  const blob = new Blob([lastResult], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'rapport-ip.txt';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => {
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, 0);
+});
 </script>
-</body>
-</html>
-
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>IP Lookup & What's My IP</title>
-  <link rel="stylesheet" href="style.css" />
-</head>
-<body>
-  <div class="container">
-    <h1>IP Lookup & What's My IP</h1>
-    <section id="my-ip-section">
-      <h2>Votre IP publique :</h2>
-      <p id="my-ip">Chargement...</p>
-      <button id="refresh-ip">Rafraîchir mon IP</button>
-    </section>
-
-    <section id="lookup-section">
-      <h2>Rechercher une IP :</h2>
-      <input type="text" id="ip-input" placeholder="Entrez une IP (ex: 8.8.8.8)" />
-      <button id="search-ip">Rechercher</button>
-    </section>
-
-    <section id="result-section" style="display:none;">
-      <h2>Résultat de la recherche :</h2>
-      <pre id="result"></pre>
-      <button id="download-report">Télécharger le rapport PDF</button>
-    </section>
-  </div>
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="script.js"></script>
 </body>
 </html>
