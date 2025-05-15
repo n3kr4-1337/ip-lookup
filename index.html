@@ -7,22 +7,26 @@
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap');
   html, body {
-    margin: 0; padding: 0; height: 100%;
+    margin: 0;
+    padding: 0;
+    height: 100%;
     background: #0a0a0a;
     font-family: 'Roboto Mono', monospace;
     color: #eee;
-    overflow: hidden;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
   }
+
   canvas#bgCanvas {
     position: fixed;
-    top: 0; left: 0;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
     z-index: 0;
-    background: #0a0a0a;
   }
+
   main {
     z-index: 1;
     flex: 1;
@@ -33,63 +37,76 @@
     padding: 20px;
     text-align: center;
   }
+
   h1 {
-    margin-bottom: 10px;
-    font-size: 2.8rem;
+    font-size: 2.5rem;
     color: #50e3c2;
+    margin-bottom: 10px;
     text-shadow: 0 0 8px #50e3c2;
   }
+
   .your-ip {
-    font-size: 1.4rem;
-    margin-bottom: 10px;
+    font-size: 1.2rem;
     color: #8ef9f3;
+    margin-bottom: 10px;
   }
+
+  #refresh-btn {
+    width: 250px;
+    margin-bottom: 20px;
+  }
+
   .lookup-panel {
     background: rgba(15, 15, 15, 0.85);
-    padding: 20px 30px;
+    padding: 20px;
     border-radius: 12px;
     box-shadow: 0 0 20px #50e3c2aa;
-    max-width: 380px;
     width: 100%;
+    max-width: 360px;
   }
-  input[type="text"] {
+
+  input[type="text"],
+  button {
     width: 100%;
-    padding: 12px 15px;
-    font-size: 1.2rem;
+    padding: 12px;
+    font-size: 1.1rem;
     border: none;
     border-radius: 8px;
-    margin-bottom: 15px;
+    margin-bottom: 10px;
+    box-sizing: border-box;
+  }
+
+  input[type="text"] {
     background: #111;
     color: #eee;
     box-shadow: inset 0 0 8px #50e3c2;
   }
+
   input[type="text"]::placeholder {
     color: #50e3c2aa;
   }
+
   button {
-    width: 100%;
-    padding: 12px;
-    font-size: 1.2rem;
-    font-weight: 700;
+    font-weight: bold;
     color: #0a0a0a;
     background: #50e3c2;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
     box-shadow: 0 0 12px #50e3c2;
-    transition: background-color 0.3s ease;
-    margin-bottom: 10px;
+    cursor: pointer;
+    transition: background 0.3s ease;
   }
+
   button:hover {
     background: #40b8a6;
   }
+
   .result {
-    margin-top: 20px;
-    font-size: 1.1rem;
+    margin-top: 15px;
+    font-size: 1rem;
     color: #aaf3e3;
     word-break: break-word;
-    min-height: 70px;
+    min-height: 60px;
   }
+
   footer {
     z-index: 2;
     padding: 12px 0;
@@ -97,24 +114,15 @@
     color: #50e3c2;
     font-size: 0.9rem;
     text-align: center;
-    user-select: none;
   }
+
   footer a {
     color: #50e3c2;
     text-decoration: none;
-    font-weight: 700;
   }
+
   footer a:hover {
     text-decoration: underline;
-  }
-  @media (max-width: 480px) {
-    h1 {
-      font-size: 2rem;
-    }
-    .lookup-panel {
-      max-width: 90vw;
-      padding: 15px 20px;
-    }
   }
 </style>
 </head>
@@ -124,6 +132,7 @@
   <h1>IP Lookup</h1>
   <div class="your-ip">Votre IPv4 : <span id="public-ip">Chargement...</span></div>
   <button id="refresh-btn">⟳ Rafraîchir</button>
+
   <div class="lookup-panel">
     <input type="text" id="ip-input" placeholder="Entrez une IP à chercher" />
     <button id="lookup-btn">Rechercher</button>
@@ -136,7 +145,7 @@
 </footer>
 
 <script>
-// Bulles animées en fond
+// Fond animé
 const canvas = document.getElementById('bgCanvas');
 const ctx = canvas.getContext('2d');
 let w, h;
@@ -177,7 +186,7 @@ function animate() {
 }
 animate();
 
-// Récupération IP publique
+// IP publique
 async function fetchPublicIP() {
   try {
     const res = await fetch('https://api.ipify.org?format=json');
@@ -188,16 +197,14 @@ async function fetchPublicIP() {
   }
 }
 fetchPublicIP();
-setInterval(fetchPublicIP, 60000);
 document.getElementById('refresh-btn').addEventListener('click', fetchPublicIP);
 
-// Lookup IP + rapport texte
 let lastResult = "";
 document.getElementById('lookup-btn').addEventListener('click', async () => {
   const ip = document.getElementById('ip-input').value.trim();
   const resultDiv = document.getElementById('lookup-result');
   if (!ip) {
-    resultDiv.textContent = "Merci d'entrer une IP valide.";
+    resultDiv.textContent = "Merci d'entrer une IP.";
     return;
   }
   resultDiv.textContent = "Recherche en cours...";
@@ -220,12 +227,11 @@ Fournisseur : ${data.org || 'N/A'}
       lastResult = resultText;
     }
   } catch {
-    resultDiv.textContent = "Erreur.";
+    resultDiv.textContent = "Erreur réseau.";
     lastResult = "";
   }
 });
 
-// Télécharger le rapport texte
 document.getElementById('download-btn').addEventListener('click', () => {
   if (!lastResult) {
     alert("Aucun rapport à télécharger.");
