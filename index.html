@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>IP Lookup - AthenaX</title>
+<title>IP Lookup - n3kr4</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap');
   html, body {
@@ -120,8 +120,8 @@
 <body>
 <canvas id="bgCanvas"></canvas>
 <main>
-  <h1>IP Lookup AthenaX</h1>
-  <div class="your-ip">Votre IP publique : <span id="public-ip">Chargement...</span></div>
+  <h1>IP Lookup</h1>
+  <div class="your-ip">Votre IPv4 : <span id="public-ip">Load ...</span></div>
   <div class="lookup-panel">
     <input type="text" id="ip-input" placeholder="Entrez une IP à chercher" />
     <button id="lookup-btn">Rechercher</button>
@@ -129,7 +129,7 @@
   </div>
 </main>
 <footer>
-  2025 © tous droits réservés <a href="https://guns.lol" target="_blank" rel="noopener">n3kr4</a>
+  2025 © ip lookup by <a href="https://guns.lol/bsm" target="_blank" rel="noopener">n3kr4</a>
 </footer>
 
 <script>
@@ -208,7 +208,7 @@ document.getElementById('lookup-btn').addEventListener('click', async () => {
     const res = await fetch(`https://ipapi.co/${ip}/json/`);
     const data = await res.json();
     if(data.error) {
-      resultDiv.textContent = "IP non trouvée.";
+      resultDiv.textContent = "IP invalid.";
     } else {
       resultDiv.innerHTML = `
         <strong>IP:</strong> ${data.ip}<br/>
@@ -220,7 +220,7 @@ document.getElementById('lookup-btn').addEventListener('click', async () => {
       `;
     }
   } catch {
-    resultDiv.textContent = "Erreur lors de la recherche.";
+    resultDiv.textContent = "Erreur.";
   }
 });
 </script>
