@@ -1,0 +1,35 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>IP Lookup & What's My IP</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>IP Lookup & What's My IP</h1>
+    <section id="my-ip-section">
+      <h2>Votre IP publique :</h2>
+      <p id="my-ip">Chargement...</p>
+      <button id="refresh-ip">Rafraîchir mon IP</button>
+    </section>
+
+    <section id="lookup-section">
+      <h2>Rechercher une IP :</h2>
+      <input type="text" id="ip-input" placeholder="Entrez une IP (ex: 8.8.8.8)" />
+      <button id="search-ip">Rechercher</button>
+    </section>
+
+    <section id="result-section" style="display:none;">
+      <h2>Résultat de la recherche :</h2>
+      <pre id="result"></pre>
+      <button id="download-report">Télécharger le rapport PDF</button>
+    </section>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
